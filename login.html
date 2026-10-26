@@ -1,0 +1,53 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login - Student Management System</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+
+    <div class="login-container">
+        <h1>Student Management System</h1>
+        <h2>Login</h2>
+        <p>Login to continue</p>
+
+        <form id="loginForm">
+            <label>Username</label>
+            <input type="text" id="username"
+                   placeholder="Enter username" required>
+
+            <label>Password</label>
+            <input type="password" id="password"
+                   placeholder="Enter password" required>
+
+            <button type="submit">Login</button>
+
+            <p id="message"></p>
+        </form>
+    </div>
+
+    <script>
+        var form = document.getElementById("loginForm");
+        var message = document.getElementById("message");
+
+        form.addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            var username =
+                document.getElementById("username").value;
+            var password =
+                document.getElementById("password").value;
+
+            if (username === "admin" && password === "12345") {
+                window.location.href = "home.html";
+            } else {
+                message.textContent =
+                    "Invalid username or password!";
+                message.style.color = "red";
+            }
+        });
+    </script>
+
+</body>
+</html>

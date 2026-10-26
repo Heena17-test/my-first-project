@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View Students</title>
+    <link rel="stylesheet" href="student.css">
+</head>
+<body>
+
+    <header>
+        <h2>Student Management System</h2>
+        <a href="home.html">Home</a>
+    </header>
+
+    <div class="container">
+        <h1>Student Records</h1>
+        <a href="index.html" class="add-btn">+ Add Student</a>
+
+        <input type="text" id="search"
+               placeholder="Search student by name">
+
+        <p id="message"></p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Course</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="studentTable"></tbody>
+        </table>
+
+    </div>
+
+    <script>
+        var search = document.getElementById("search");
+        var table = document.getElementById("studentTable");
+        var message = document.getElementById("message");
+
+        async function loadStudents() {
+            message.textContent = "Loading students...";
+
+            try {
+                var response = await fetch(
+                "http://localhost:8082/api/students"
+                );
+
+                if (!response.ok) {
+                    throw new Error("Failed to load students");
+                }
+
+                var students = await response.json();
+                table.innerHTML = "";
+
+                students.forEach(function(student) {
+                    var row = table.insertRow();
+
+                    row.insertCell().textContent = student.studentId;
+                    row.insertCell().textContent = student.name;
+                    row.insertCell().textContent = student.email;
+                    row.insertCell().textContent = student.course;
+
+                    var actionCell = row.insertCell();
+                    var editBtn = document.createElement("button");
+editBtn.textContent = "Edit";
+editBtn.className = "edit-btn";
+
+editBtn.onclick = function() {
+    var newName = prompt("Enter student name:", student.name);
+    if (newName === null || newName.trim() === "") return;
+
+    var newEmail = prompt("Enter student email:", student.email);
+    if (newEmail === null || newEmail.trim() === "") return;
+
+    var newPhone = prompt("Enter phone number:", student.phone || "");
+    if (newPhone === null) return;
+
+    var newDob = prompt("Enter DOB (YYYY-MM-DD):", student.dob || "");
+    if (newDob === null) return;
+
+    var newGender = prompt("Enter gender:", student.gender || "");
+    if (newGender === null) return;
+
+    var newCourse = prompt("Enter course:", student.course || "");
+    if (newCourse === null || newCourse.trim() === "") return;
+
+    updateStudent(student.studentId, {
+        name: newName.trim(),
+        email: newEmail.trim(),
+        phone: newPhone.trim(),
+        dob: newDob.trim(),
+        gender: newGender.trim(),
+        course: newCourse.trim()
+    });
+};
+
+actionCell.appendChild(editBtn);
+
+var deleteBtn = document.createElement("button");
+deleteBtn.textContent = "Delete";
+deleteBtn.className = "delete-btn";
+
+deleteBtn.onclick = async function() {
+    var confirmDelete = confirm(
+        "Are you sure you want to delete " + student.name + "?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+        var response = await fetch(
+            "http://localhost:8082/api/students/" + student.studentId,
+            { method: "DELETE" }
+        );
+
+        if (!response.ok) {
+            alert("Failed to delete student.");
+            return;
+        }
+
+        alert("Student deleted successfully!");
+        loadStudents();
+    } catch (error) {
+        alert("Could not connect to the backend.");
+        console.error(error);
+    }
+};
+
+actionCell.appendChild(deleteBtn);
+
+                });
+                
+
+                message.textContent = students.length === 0
+                    ? "No students registered yet."
+                    : "";
+
+            } catch (error) {
+                message.textContent =
+                    "Could not load students. Check that Spring Boot is running.";
+                console.error(error);
+            }
+        }
+        async function updateStudent(id, student) {
+    try {
+        var response = await fetch("http://localhost:8082/api/students/" + id, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(student)
+        });
+
+        var result = await response.text();
+
+        if (!response.ok) {
+            alert("Update failed: " + result);
+            return;
+        }
+
+        alert("Student updated successfully!");
+        loadStudents();
+    } catch (error) {
+        alert("Could not connect to the backend.");
+        console.error(error);
+    }
+}
+
+        search.addEventListener("input", function() {
+            var value = search.value.toLowerCase();
+            var rows = table.getElementsByTagName("tr");
+
+            for (var i = 0; i < rows.length; i++) {
+                var name = rows[i].cells[1].textContent.toLowerCase();
+
+                rows[i].style.display =
+                    name.includes(value) ? "" : "none";
+            }
+        });
+
+        loadStudents();
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Registration</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <button type="button" class="close-btn"
+    onclick="window.location.href='home.html'">&times;</button>
+        <h1>Student Registration</h1>
+        <p>Fill in your details below</p>
+
+        <form id="studentForm">
+
+            <label>Full Name</label>
+            <input type="text" id="name"
+                   placeholder="Enter your name" required>
+
+            <label>Email</label>
+            <input type="email" id="email"
+                   placeholder="Enter your email" required>
+
+            <label>Phone Number</label>
+            <input type="tel" id="phone"
+                   placeholder="Enter 10-digit phone number"
+                   pattern="[0-9]{10}" required>
+
+            <label>Date of Birth</label>
+            <input type="date" id="dob" required>
+
+            <label>Gender</label>
+             <select id="gender" required>
+                <option value="">Select gender</option>
+                 <option>Female</option>
+                <option>Male</option>
+                <option>Other</option>
+            </select>
+
+            <label>Course</label>
+            <select id="course" required>
+                <option value="">Select course</option>
+                <option>Computer Science</option>
+                <option>Electrical Engineering</option>
+                <option>Electronics Engineering</option>
+                <option>Information Technology</option>
+            </select>
+
+            <button type="submit">Register</button>
+            <button type="reset" class="reset">Clear</button>
+
+        </form>      
+        <button type="button" onclick="window.location.href='student.html'">
+    View Students
+</button>
+    
+
+        <p id="message"></p>
+    </div>
+    <script>
+        
+var form = document.getElementById("studentForm");
+var message = document.getElementById("message");
+
+form.addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    var student = {
+        name: document.getElementById("name").value,
+        email: document.getElementById("email").value,
+        phone: document.getElementById("phone").value,
+        dob: document.getElementById("dob").value,
+        gender: document.getElementById("gender").value,
+        course: document.getElementById("course").value
+    };
+
+    try {
+        var response = await fetch("http://localhost:8082/api/students", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(student)
+        });
+
+        var result = await response.text();
+
+        if (response.ok) {
+            alert("Registration Successful! Student details saved successfully.");
+            var viewBtn = document.createElement("button");
+viewBtn.textContent = "View Students";
+viewBtn.onclick = function() {
+    window.location.href = "student.html";
+};
+message.appendChild(viewBtn);
+            message.textContent = result;
+            message.style.color = "green";
+            form.reset();
+        } else {
+            message.textContent = "Registration failed. Please try again.";
+            message.style.color = "red";
+            console.error(result);
+        }
+    } catch (error) {
+        message.textContent = "Could not connect to the backend.";
+        message.style.color = "red";
+        console.error(error);
+    }
+});
+
+form.addEventListener("reset", function(event) {
+    if (event.isTrusted) {
+        message.textContent = "";
+    }
+});
+
+
+</script>
+    
+</body>
+</html>
